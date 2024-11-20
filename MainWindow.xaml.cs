@@ -101,6 +101,8 @@ namespace SALOON
             tbSearch.IsEnabled = false;
             cbFilter.IsEnabled = false;
             cbSort.IsEnabled = false;
+            cbPageSize.IsEnabled = false;
+            chbClientBDayInMonth.IsEnabled = false;
 
             Async(() =>
             {
@@ -111,7 +113,7 @@ namespace SALOON
                     || x.LastName.Contains(SearchText)
                     || x.Patronymic.Contains(SearchText)
                     || x.Phone.Contains(SearchText)
-                    || x.Email.Contains(SearchText)).ToList(); 
+                    || x.Email.Contains(SearchText)).ToList();
 
                     var list = new List<ClientView>();
 
@@ -139,6 +141,8 @@ namespace SALOON
                         tbSearch.IsEnabled = true;
                         cbFilter.IsEnabled = true;
                         cbSort.IsEnabled = true;
+                        cbPageSize.IsEnabled = true;
+                        chbClientBDayInMonth.IsEnabled = true;
                     });
                 }
             });

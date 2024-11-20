@@ -20,13 +20,13 @@
         </Grid.ColumnDefinitions>
 
         <TextBox x:Name="tbSearch" Width="200" Margin="10"/>
-        <ComboBox x:Name="cbSort" Grid.Column="1">
+        <ComboBox x:Name="cbSort" Grid.Column="1" SelectedIndex="0">
             <ComboBoxItem x:Name="cbiSortLastName" Content="По фамилии"/>
             <ComboBoxItem x:Name="cbiSortLastVisit" Content="По дате последнено посещения"/>
             <ComboBoxItem x:Name="cbiSortVisits" Content="По количеству посещений"/>
         </ComboBox>
         
-        <ComboBox x:Name="cbFilter" Grid.Column="2">
+        <ComboBox x:Name="cbFilter" Grid.Column="2" SelectedIndex="0">
             <ComboBoxItem x:Name="cbiGenderAll" Content="Все"/>
             <ComboBoxItem x:Name="cbiGenderMan" Content="Мужской"/>
             <ComboBoxItem x:Name="cbiGenderJamal" Content="Женский"/>
@@ -71,7 +71,7 @@
         <TextBlock x:Name="tblDataCount" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="1"></TextBlock>
         <Button x:Name="btnNext" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="1">Next</Button>
 
-        <CheckBox Content="Клиенты, у которых скоро ДР" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" Width="190" HorizontalAlignment="Right"/>
+        <CheckBox x:Name="chbClientBDayInMonth" Content="Клиенты, у которых скоро ДР" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" Width="190" HorizontalAlignment="Right"/>
 
         <Button x:Name="btnDelete" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0">Delete</Button>
         <ComboBox x:Name="cbPageSize" Width="60" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Left" SelectedIndex="0">
