@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SALOON.ViewModel
 {
-    internal class ClientView
+    public class ClientView
     {
         public Client Client { get; set; }
 

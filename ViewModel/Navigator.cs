@@ -45,7 +45,7 @@ namespace SALOON.ViewModel
             return pages.Count;
         }
 
-        public int GetPageSize()
+        public int GetDataSize()
         {
             return pages[pageIndex].Count;
         }

@@ -4,6 +4,7 @@ using SALOON.dbModel;
 using SALOON.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Mapping;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -20,6 +21,7 @@ namespace SALOON
         private Navigator<ClientView> Navigator;
         string SearchText = "";
         int DataCount = 0;
+        int PageSize = Int32.MaxValue;
 
         public MainWindow()
         {
@@ -29,8 +31,38 @@ namespace SALOON
             btnNext.Click += BtnNext_Click;
             btnDelete.Click += BtnDelete_Click;
             tbSearch.TextChanged += TbSearch_TextChanged;
-
+            cbFilter.SelectionChanged += UpdateNiggers;
+            cbSort.SelectionChanged += UpdateNiggers;
+            cbPageSize.SelectionChanged += CbPageSize_SelectionChanged;
             loadNiggers();
+        }
+
+        private void UpdateNiggers(object sender, SelectionChangedEventArgs e)
+        {
+            loadNiggers();
+        }
+
+        private void CbPageSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(cbPageSize.SelectedItem != null)
+            {
+                switch (cbPageSize.SelectedIndex) 
+                {
+                    case 0:
+                        PageSize = Int32.MaxValue;
+                        break;
+                    case 1:
+                        PageSize = 10;
+                        break;
+                    case 2:
+                        PageSize = 50;
+                        break;
+                    case 3:
+                        PageSize = 200;
+                        break;
+                }
+                loadNiggers();
+            }
         }
 
         private void TbSearch_TextChanged(object sender, TextChangedEventArgs e)
@@ -61,6 +93,32 @@ namespace SALOON
                     }
                 }
             }
+        }
+
+        public List<ClientView> SortClients(List<ClientView> list)
+        {
+            switch (cbSort.SelectedIndex)
+            {  
+                case 1: 
+                    list = (List<ClientView>) list.OrderBy(x => x.Client.LastName);
+                    break;
+                case 2:
+                    list = (List<ClientView>)list.OrderBy(x => x.LastVisit);
+                    break;
+                case 3:
+                    list = (List<ClientView>)list.OrderByDescending(x => x.Visits);
+                    break;
+            }
+            return list;
+        }
+
+        public List<ClientView> FilterGender(List<ClientView> list)
+        {
+            if(cbFilter.SelectedIndex != 0)
+            {
+                return (List<ClientView>)list.Where(x => x.Client.GenderCode == cbFilter.SelectedIndex.ToString());
+            }
+            return list;
         }
 
         private void BtnNext_Click(object sender, RoutedEventArgs e)
@@ -128,7 +186,10 @@ namespace SALOON
                         list.Add(c);
                     }
 
-                    Navigator = new Navigator<ClientView>(list, 20);
+                    list = FilterGender(list);
+                    list = SortClients(list);
+
+                    Navigator = new Navigator<ClientView>(list, PageSize);
                     DataCount = list.Count;
 
                     Dispatcher.Invoke(() => {
@@ -150,7 +211,7 @@ namespace SALOON
 
         public void CurrentDataSize()
         {
-            int CurrentDataSize = Navigator.GetPageSize();
+            int CurrentDataSize = Navigator.GetDataSize();
             tblDataCount.Text = $"{CurrentDataSize}/{DataCount}";
         }
     }

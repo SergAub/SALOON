@@ -21,6 +21,7 @@
 
         <TextBox x:Name="tbSearch" Width="200" Margin="10"/>
         <ComboBox x:Name="cbSort" Grid.Column="1" SelectedIndex="0">
+            <ComboBoxItem x:Name="cbiSortNO" Content="Без сортировки"/>
             <ComboBoxItem x:Name="cbiSortLastName" Content="По фамилии"/>
             <ComboBoxItem x:Name="cbiSortLastVisit" Content="По дате последнено посещения"/>
             <ComboBoxItem x:Name="cbiSortVisits" Content="По количеству посещений"/>
