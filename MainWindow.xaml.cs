@@ -2,6 +2,7 @@
 
 using SALOON.dbModel;
 using SALOON.ViewModel;
+using SALOON.Windows;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Core.Mapping;
@@ -144,7 +145,10 @@ namespace SALOON
             {
                 using (var db = new Entities())
                 {
-                    var niggers = db.Service.ToList();
+                    var niggers = db.Service
+                    .Where(x => x.Title.Contains(SearchText)
+                    || x.Description.Contains(SearchText))
+                    .ToList();
 
                     Dispatcher.Invoke(() => {
                         if (cbSort.SelectedItem == cbiSortAsk)
@@ -193,6 +197,8 @@ namespace SALOON
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            Upsert upsert = new Upsert();
+
             var service = btnTag.GetValue(sender) as ServiceView;
             MessageBox.Show(service.Service.Title);
         }
@@ -200,7 +206,20 @@ namespace SALOON
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             var service = btnTag.GetValue(sender) as ServiceView;
-            MessageBox.Show(service.Service.Title);
+            using (var db = new Entities())
+            {
+                MessageBoxResult result = MessageBox.Show($"Удалить {service.Service.Title}?",
+                    "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if(result == MessageBoxResult.Yes)
+                {
+                    var delItem = db.Service.Where(x => x.Title == service.Service.Title).FirstOrDefault();
+                    if (delItem != null)
+                    {
+                        db.Service.Remove(delItem);
+                        db.SaveChanges();
+                    }
+                }
+            }
         }
     }
 }
