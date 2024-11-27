@@ -66,6 +66,7 @@
     </ApplicationDefinition>
     <Compile Include="ViewModel\ClientView.cs" />
     <Compile Include="ViewModel\Navigator.cs" />
+    <Compile Include="ViewModel\ServiceView.cs" />
     <Compile Include="ViewModel\TagView.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -169,6 +170,8 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Img\122454.png" />
+    <Resource Include="Img\96.png" />
     <Content Include="dbModel\Model.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>Model.edmx</DependentUpon>
@@ -179,6 +182,40 @@
       <DependentUpon>Model.edmx</DependentUpon>
       <LastGenOutput>Model.cs</LastGenOutput>
     </Content>
+    <Resource Include="Img\face.png" />
+    <Resource Include="Img\makeup.jpg" />
+    <Resource Include="Img\man.png" />
+    <Resource Include="Img\mask.jpeg" />
+    <Resource Include="Img\piling.jpg" />
+    <Resource Include="Img\soliarij.jpg" />
+    <Resource Include="Img\брови.png" />
+    <Resource Include="Img\Гречишный массаж.jpg" />
+    <Resource Include="Img\Декорирование нарощенных ресниц стразами.jpg" />
+    <Resource Include="Img\Демакияж.jpg" />
+    <Resource Include="Img\Депиляция воском.jpg" />
+    <Resource Include="Img\Европейский маникюр.jpg" />
+    <Resource Include="Img\ИК-сауна.jpg" />
+    <Resource Include="Img\Классический маникюр.png" />
+    <Resource Include="Img\Комбинированный маникюр.jpg" />
+    <Resource Include="Img\Контурная пластика.jpg" />
+    <Resource Include="Img\массаж.jpg" />
+    <Resource Include="Img\Мезотерапия.jpg" />
+    <Resource Include="Img\Моделирование ресниц.jpg" />
+    <Resource Include="Img\ногти.png" />
+    <Resource Include="Img\Окрашивание бровей.jpg" />
+    <Resource Include="Img\Парафинотерапия.jpg" />
+    <Resource Include="Img\Покрытие ногтей гель-лаком.jpg" />
+    <Resource Include="Img\Полировка ногтей.jpg" />
+    <Resource Include="Img\Прессотерапия.jpg" />
+    <Resource Include="Img\Прокол ушей пистолетом.png" />
+    <Resource Include="Img\Ресницы.png" />
+    <Resource Include="Img\Снятие ресниц.jpg" />
+    <Resource Include="Img\Стоун-терапия.jpg" />
+    <Resource Include="Img\стрижка.png" />
+    <Resource Include="Img\Укрепление ногтей гелем.jpg" />
+    <Resource Include="Img\Шугаринг.jpg" />
+    <Resource Include="Img\Экспресс SPA.png" />
+    <Resource Include="Img\Экспресс-педикюр.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity.Core.Mapping;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,10 +19,11 @@ namespace SALOON
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Navigator<ClientView> Navigator;
+        private Navigator<ServiceView> Navigator;
         string SearchText = "";
         int DataCount = 0;
         int PageSize = Int32.MaxValue;
+        public static bool IsAdmin = false;
 
         public MainWindow()
         {
@@ -29,15 +31,46 @@ namespace SALOON
 
             btnBack.Click += BtnBack_Click;
             btnNext.Click += BtnNext_Click;
-            btnDelete.Click += BtnDelete_Click;
             tbSearch.TextChanged += TbSearch_TextChanged;
-            cbFilter.SelectionChanged += UpdateNiggers;
+
+            btnAdmin.Click += BtnAdmin_Click;
+
             cbSort.SelectionChanged += UpdateNiggers;
             cbPageSize.SelectionChanged += CbPageSize_SelectionChanged;
+            cbFilter.SelectionChanged += CbFilter_SelectionChanged;
+          
             loadNiggers();
         }
 
+        private void BtnAdmin_Click(object sender, RoutedEventArgs e)
+        {
+            if (tbAdmin.Visibility == Visibility.Hidden)
+            {
+                tbAdmin.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                if (tbAdmin.Text == "0000")
+                {
+                    IsAdmin = true;
+                    btnAdmin.IsEnabled = false;
+                    loadNiggers();
+
+                    MessageBox.Show("Вы теперь админ :)");
+                }
+                else
+                {
+                    MessageBox.Show("Код неверный!");                       
+                }
+                tbAdmin.Visibility = Visibility.Hidden;
+            }
+        }
+
         private void UpdateNiggers(object sender, SelectionChangedEventArgs e)
+        {
+            loadNiggers();
+        }
+        private void CbFilter_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             loadNiggers();
         }
@@ -71,68 +104,16 @@ namespace SALOON
             loadNiggers();
         }
 
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
-        {
-            if(dgNiggers.SelectedItems.Count > 0)
-            {
-                using (var db = new Entities())
-                {
-                    foreach (ClientView item in dgNiggers.SelectedItems)
-                    {
-                        MessageBoxResult result = MessageBox.Show(
-                            $"Вы хотите удалить: {item.Client.LastName} {item.Client.FirstName} {item.Client.Patronymic}",
-                            "Удаление пользователя", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                        if (result == MessageBoxResult.Yes)
-                        {
-                            var client = db.Client.FirstOrDefault(x => x.ID == item.Client.ID);
-                            db.Client.Remove(client);
-                            db.SaveChanges();
-                            loadNiggers();
-                        }
-                    }
-                }
-            }
-        }
-
-        public List<ClientView> SortClients(List<ClientView> list)
-        {
-            switch (cbSort.SelectedIndex)
-            {  
-                case 1: 
-                    list = (List<ClientView>) list.OrderBy(x => x.Client.LastName);
-                    break;
-                case 2:
-                    list = (List<ClientView>)list.OrderBy(x => x.LastVisit);
-                    break;
-                case 3:
-                    list = (List<ClientView>)list.OrderByDescending(x => x.Visits);
-                    break;
-            }
-            return list;
-        }
-
-        public List<ClientView> FilterGender(List<ClientView> list)
-        {
-            if(cbFilter.SelectedIndex != 0)
-            {
-                return (List<ClientView>)list.Where(x => x.Client.GenderCode == cbFilter.SelectedIndex.ToString());
-            }
-            return list;
-        }
-
         private void BtnNext_Click(object sender, RoutedEventArgs e)
         {
             Navigator.MoveToPage(Navigator.GetCurrentPage() + 1);
-            dgNiggers.ItemsSource = Navigator.CurrentPage;
-            CurrentDataSize();
+            RecalculateCurrentDataSize();
         }
 
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
             Navigator.MoveToPage(Navigator.GetCurrentPage() - 1);
-            dgNiggers.ItemsSource = Navigator.CurrentPage;
-            CurrentDataSize();
+            RecalculateCurrentDataSize();
         }
 
         private void Async(Action action)
@@ -155,64 +136,71 @@ namespace SALOON
         {
             btnNext.IsEnabled = false;
             btnBack.IsEnabled = false;
-            btnDelete.IsEnabled = false;
-            tbSearch.IsEnabled = false;
-            cbFilter.IsEnabled = false;
+            tbSearch.IsEnabled = false;          
             cbSort.IsEnabled = false;
             cbPageSize.IsEnabled = false;
-            chbClientBDayInMonth.IsEnabled = false;
 
             Async(() =>
             {
                 using (var db = new Entities())
                 {
-                    var niggers = db.Client.Include("Tag")
-                    .Where(x => x.FirstName.Contains(SearchText)
-                    || x.LastName.Contains(SearchText)
-                    || x.Patronymic.Contains(SearchText)
-                    || x.Phone.Contains(SearchText)
-                    || x.Email.Contains(SearchText)).ToList();
+                    var niggers = db.Service.ToList();
 
-                    var list = new List<ClientView>();
+                    Dispatcher.Invoke(() => {
+                        if (cbSort.SelectedItem == cbiSortAsk)
+                        {
+                            niggers = niggers.OrderBy(x => x.Cost).ToList();
+                        }
+                        else if (cbSort.SelectedItem == cbiSortDesk)
+                        {
+                            niggers = niggers.OrderBy(x => x.Cost).Reverse().ToList();
+                        }
+                    });
+                   
+                    var list = new List<ServiceView>();
 
                     foreach (var nigger in niggers)
                     {
-                        var c = new ClientView { Client = nigger };
-                        foreach (var t in nigger.Tag)
-                        {
-                            t.Color = "#" + t.Color;
-                            c.Tags.Add(new TagView { Tag = t });
-                        }
+                        var c = new ServiceView { Service = nigger };
                         list.Add(c);
                     }
 
-                    list = FilterGender(list);
-                    list = SortClients(list);
-
-                    Navigator = new Navigator<ClientView>(list, PageSize);
+                    Navigator = new Navigator<ServiceView>(list, PageSize);
                     DataCount = list.Count;
 
                     Dispatcher.Invoke(() => {
-                        dgNiggers.ItemsSource = Navigator.CurrentPage;
-                        CurrentDataSize();
+
+                        RecalculateCurrentDataSize();
 
                         btnNext.IsEnabled = true;
                         btnBack.IsEnabled = true;
-                        btnDelete.IsEnabled = true;
                         tbSearch.IsEnabled = true;
-                        cbFilter.IsEnabled = true;
                         cbSort.IsEnabled = true;
                         cbPageSize.IsEnabled = true;
-                        chbClientBDayInMonth.IsEnabled = true;
+                        lbRabbit.ItemsSource = list;
                     });
                 }
             });
         }
 
-        public void CurrentDataSize()
+        public void RecalculateCurrentDataSize()
         {
             int CurrentDataSize = Navigator.GetDataSize();
             tblDataCount.Text = $"{CurrentDataSize}/{DataCount}";
+        }
+
+        PropertyInfo btnTag = typeof(Button).GetProperty("Tag");
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var service = btnTag.GetValue(sender) as ServiceView;
+            MessageBox.Show(service.Service.Title);
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            var service = btnTag.GetValue(sender) as ServiceView;
+            MessageBox.Show(service.Service.Title);
         }
     }
 }

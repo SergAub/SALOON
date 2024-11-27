@@ -22,64 +22,61 @@
         <TextBox x:Name="tbSearch" Width="200" Margin="10"/>
         <ComboBox x:Name="cbSort" Grid.Column="1" SelectedIndex="0">
             <ComboBoxItem x:Name="cbiSortNO" Content="Без сортировки"/>
-            <ComboBoxItem x:Name="cbiSortLastName" Content="По фамилии"/>
-            <ComboBoxItem x:Name="cbiSortLastVisit" Content="По дате последнено посещения"/>
-            <ComboBoxItem x:Name="cbiSortVisits" Content="По количеству посещений"/>
+            <ComboBoxItem x:Name="cbiSortAsk" Content="По стоимости"/>
+            <ComboBoxItem x:Name="cbiSortDesk" Content="По стоимости обр."/>
         </ComboBox>
         
-        <ComboBox x:Name="cbFilter" Grid.Column="2" SelectedIndex="0">
-            <ComboBoxItem x:Name="cbiGenderAll" Content="Все"/>
-            <ComboBoxItem x:Name="cbiGenderMan" Content="Мужской"/>
-            <ComboBoxItem x:Name="cbiGenderJamal" Content="Женский"/>
-        </ComboBox>
+        <Button x:Name="btnAdmin" Grid.Column="2" HorizontalAlignment="Left">
+            Admin mode
+        </Button>
+        <TextBox x:Name="tbAdmin" Grid.Column="2" HorizontalAlignment="Right" Margin="10" MinWidth="100" Visibility="Hidden">
+            
+        </TextBox>
 
-        <DataGrid AutoGenerateColumns="False" x:Name="dgNiggers" Grid.Row="1" Grid.ColumnSpan="3" Margin="10"
-                  IsReadOnly="True" CanUserSortColumns="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Client.ID}"></DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Client.FirstName}"></DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Client.LastName}"></DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Client.Patronymic}"></DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Client.Birthday}"></DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Client.RegistrationDate}"></DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding LastVisit}"></DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding Visits}"></DataGridTextColumn>
-                <DataGridTemplateColumn>
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <ListBox ItemsSource="{Binding Tags}">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        
-                                        <TextBlock 
-                                            Text="{Binding Tag.Title}" 
-                                            Background="{Binding Tag.Color}"
-                                            Foreground="Black"
-                                            Margin="2"
-                                            Padding="2"
-                                        />
-                                        
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+        <ListBox x:Name="lbRabbit" Grid.Row="1" Grid.ColumnSpan="3" Margin="8">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Height="100" Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="30"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{Binding Service.MainImagePath}" />
+                        <StackPanel VerticalAlignment="Top" Grid.Column="2">
+                            <TextBlock Text="{Binding Service.Title}" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding PriceChёrt}" TextDecorations="Strikethrough"/>
+                                <TextBlock Text="{Binding PriceForTime}" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding Discount}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom">
+                            <Button Click="Button_Click" Tag="{Binding}" Visibility="{Binding AdminVisiblity}">Редактировать</Button>
+                            <Button Click="Button_Click_1" Tag="{Binding}" Visibility="{Binding AdminVisiblity}">Удалить</Button>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
         <Button x:Name="btnBack" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="1" >Back</Button>
         <TextBlock x:Name="tblDataCount" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="1"></TextBlock>
         <Button x:Name="btnNext" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="1">Next</Button>
-
-        <CheckBox x:Name="chbClientBDayInMonth" Content="Клиенты, у которых скоро ДР" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" Width="190" HorizontalAlignment="Right"/>
-
-        <Button x:Name="btnDelete" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0">Delete</Button>
         <ComboBox x:Name="cbPageSize" Width="60" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Left" SelectedIndex="0">
             <ComboBoxItem x:Name="cbiPagesAll">Все</ComboBoxItem>
             <ComboBoxItem x:Name="cbiPages10">10</ComboBoxItem>
             <ComboBoxItem x:Name="cbiPages50">50</ComboBoxItem>
             <ComboBoxItem x:Name="cbiPages200">200</ComboBoxItem>
+        </ComboBox>
+
+        <ComboBox x:Name="cbFilter" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" Width="130" HorizontalAlignment="Right" SelectedIndex="0">
+            <ComboBoxItem x:Name="cbiNoFilter">No filter</ComboBoxItem>
+            <ComboBoxItem x:Name="cbi05">0-5 %</ComboBoxItem>
+            <ComboBoxItem x:Name="cbi515">5-15 %</ComboBoxItem>
+            <ComboBoxItem x:Name="cbi1530">15-30 %</ComboBoxItem>
+            <ComboBoxItem x:Name="cbi3070">30-70 %</ComboBoxItem>
+            <ComboBoxItem x:Name="cbi70100">70-100 %</ComboBoxItem>
         </ComboBox>
     </Grid>
 </Window>
