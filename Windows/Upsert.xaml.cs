@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using SALOON.dbModel;
 using SALOON.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,7 @@ namespace SALOON.Windows
                 createNew = true;
                 serviceView = new ServiceView { Service = new dbModel.Service { } };
                 tbId.Text = "" + -1;
+                spID.Visibility = Visibility.Collapsed;
             }
             else
             {
@@ -46,13 +48,25 @@ namespace SALOON.Windows
                 tbLastSeconds.Text = "" + service.Service.DurationInSeconds;
                 tbTitle.Text = "" + service.Service.Title;
 
+                using (var db = new Entities())
+                {
+                    var fucks = db.ServicePhoto.Where(x => x.ServiceID == serviceView.Service.ID).ToList();
+
+                    foreach(var fuck in fucks)
+                    {
+
+                    }
+
+                    lbPhoto.ItemsSource = fuck;
+                }
+
                 try
                 {
                     imgMain.Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath(service.Service.MainImagePath)));
                 }
                 catch
                 {
-                    MessageBox.Show("Femboy error");
+
                 }
             }   
 
@@ -63,18 +77,44 @@ namespace SALOON.Windows
             btnSave.Click += BtnSave_Click;
         }
 
+        private Service getServiceFromFields()
+        {
+            var s = serviceView.Service;
+            decimal cost;
+            double disc = 0;
+            int dur = 0;
+
+            if (tbTitle.Text.Length <= 2) throw new Exception("No title defined"); 
+            s.Title = tbTitle.Text.Trim();
+
+            if(!decimal.TryParse(tbCost.Text.Replace(" ", ""), out cost)) throw new Exception("Недопустимые данные");
+            if (!double.TryParse(tbDiscount.Text.Replace(" ", ""), out disc)) throw new Exception("Недопустимые данные");
+            if (!int.TryParse(tbDiscount.Text.Replace(" ", ""), out dur)) throw new Exception("Недопустимые данные");
+
+            s.Description = tbDescr.Text.Trim();
+
+            if (dur > 240 || dur < 1) throw new Exception("0000x800000000000");
+            s.Cost = cost;
+            s.Discount = disc;
+            s.DurationInSeconds = dur;
+
+            return s;
+        }
+
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             using (var db = new dbModel.Entities())
             {
-                var h = db.Service.Where(x => x.ID == serviceView.Service.ID).First();
-                MessageBox.Show(h.MainImagePath);
-
-                h.MainImagePath = serviceView.Service.MainImagePath;
-
-                MessageBox.Show(h.MainImagePath);
-                db.SaveChanges();
-                Close();
+                try
+                {
+                    db.Service.AddOrUpdate(getServiceFromFields());
+                    db.SaveChanges();
+                    Close();
+                }
+                catch (Exception sex)
+                {
+                    MessageBox.Show(sex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }          
         }
 
