@@ -1,6 +1,7 @@
 ﻿using SALOON.dbModel;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using System.Windows;
 
 namespace SALOON.ViewModel
 {
-    internal class ServiceView
+    public class ServiceView
     {
         public Service Service { get; set; }
 
@@ -38,6 +39,15 @@ namespace SALOON.ViewModel
             }
         }
 
+        public int PriceWithDiscount
+        {
+            get
+            {
+                return (int)((decimal)(1 - Service.Discount) * Service.Cost);
+            }
+        }
+
+
         public string Discount
         {
             get
@@ -58,6 +68,14 @@ namespace SALOON.ViewModel
                 else
                     return Visibility.Hidden;
             } 
+        }
+
+        public string MainImg
+        {
+            get
+            {
+                return Path.GetFullPath(Service.MainImagePath);
+            }
         }
     }
 }

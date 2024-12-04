@@ -35,11 +35,18 @@ namespace SALOON
             tbSearch.TextChanged += TbSearch_TextChanged;
 
             btnAdmin.Click += BtnAdmin_Click;
+            btnNew.Click += BtnNew_Click;
 
             cbSort.SelectionChanged += UpdateNiggers;
             cbPageSize.SelectionChanged += CbPageSize_SelectionChanged;
             cbFilter.SelectionChanged += CbFilter_SelectionChanged;
           
+            loadNiggers();
+        }
+
+        private void BtnNew_Click(object sender, RoutedEventArgs e)
+        {
+            new Upsert(null).ShowDialog();
             loadNiggers();
         }
 
@@ -109,12 +116,14 @@ namespace SALOON
         {
             Navigator.MoveToPage(Navigator.GetCurrentPage() + 1);
             RecalculateCurrentDataSize();
+            lbRabbit.ItemsSource = Navigator.CurrentPage;
         }
 
         private void BtnBack_Click(object sender, RoutedEventArgs e)
         {
             Navigator.MoveToPage(Navigator.GetCurrentPage() - 1);
             RecalculateCurrentDataSize();
+            lbRabbit.ItemsSource = Navigator.CurrentPage;
         }
 
         private void Async(Action action)
@@ -137,40 +146,52 @@ namespace SALOON
         {
             btnNext.IsEnabled = false;
             btnBack.IsEnabled = false;
-            tbSearch.IsEnabled = false;          
             cbSort.IsEnabled = false;
             cbPageSize.IsEnabled = false;
+
+            bool orderByPrice = cbSort.SelectedItem == cbiSortAsk;
+            bool orderByPriceD = cbSort.SelectedItem == cbiSortDesk;
+            double filter_min = 0, filter_max = 1.1;
+
+            switch (cbFilter.SelectedIndex)
+            {
+                case 0: break;
+                case 1: filter_min = 0; filter_max = 0.05; break;
+                case 2: filter_min = 0.05; filter_max = 0.15; break;
+                case 3: filter_min = 0.15; filter_max = 0.30; break;
+                case 4: filter_min = 0.30; filter_max = 0.70; break;
+                case 5: filter_min = 0.70; filter_max = 1.1; break;
+            }
 
             Async(() =>
             {
                 using (var db = new Entities())
                 {
                     var niggers = db.Service
-                    .Where(x => x.Title.Contains(SearchText)
-                    || x.Description.Contains(SearchText))
+                    .Where(x => x.Title.Contains(SearchText) || x.Description.Contains(SearchText)).
+                    Where(x => x.Discount >= filter_min).
+                    Where(x => x.Discount < filter_max)
                     .ToList();
 
-                    Dispatcher.Invoke(() => {
-                        if (cbSort.SelectedItem == cbiSortAsk)
-                        {
-                            niggers = niggers.OrderBy(x => x.Cost).ToList();
-                        }
-                        else if (cbSort.SelectedItem == cbiSortDesk)
-                        {
-                            niggers = niggers.OrderBy(x => x.Cost).Reverse().ToList();
-                        }
-                    });
-                   
-                    var list = new List<ServiceView>();
+                    var viewList = new List<ServiceView>();
 
                     foreach (var nigger in niggers)
                     {
                         var c = new ServiceView { Service = nigger };
-                        list.Add(c);
+                        viewList.Add(c);
                     }
 
-                    Navigator = new Navigator<ServiceView>(list, PageSize);
-                    DataCount = list.Count;
+                    if (orderByPrice)
+                    {
+                        viewList = viewList.OrderBy(x => x.PriceWithDiscount).ToList();
+                    }
+                    else if (orderByPriceD)
+                    {
+                        viewList = viewList.OrderByDescending(x => x.PriceWithDiscount).ToList();
+                    }
+
+                    Navigator = new Navigator<ServiceView>(viewList, PageSize);
+                    DataCount = viewList.Count;
 
                     Dispatcher.Invoke(() => {
 
@@ -178,10 +199,10 @@ namespace SALOON
 
                         btnNext.IsEnabled = true;
                         btnBack.IsEnabled = true;
-                        tbSearch.IsEnabled = true;
                         cbSort.IsEnabled = true;
                         cbPageSize.IsEnabled = true;
-                        lbRabbit.ItemsSource = list;
+
+                        lbRabbit.ItemsSource = Navigator.CurrentPage;
                     });
                 }
             });
@@ -190,36 +211,48 @@ namespace SALOON
         public void RecalculateCurrentDataSize()
         {
             int CurrentDataSize = Navigator.GetDataSize();
-            tblDataCount.Text = $"{CurrentDataSize}/{DataCount}";
+            tblDataCount.Text = $"{CurrentDataSize * (Navigator.GetCurrentPage() + 1)}/{DataCount}";
         }
+
 
         PropertyInfo btnTag = typeof(Button).GetProperty("Tag");
 
+        /// <summary>
+        /// Update
+        /// </summary>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Upsert upsert = new Upsert();
-
             var service = btnTag.GetValue(sender) as ServiceView;
-            MessageBox.Show(service.Service.Title);
+            new Upsert(service).ShowDialog();
+            loadNiggers();
         }
 
+        /// <summary>
+        /// Delete
+        /// </summary>
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             var service = btnTag.GetValue(sender) as ServiceView;
-            using (var db = new Entities())
+            MessageBoxResult result = MessageBox.Show($"Удалить {service.Service.Title}?",
+                "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            Async(() =>
             {
-                MessageBoxResult result = MessageBox.Show($"Удалить {service.Service.Title}?",
-                    "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if(result == MessageBoxResult.Yes)
+                using (var db = new Entities())
                 {
-                    var delItem = db.Service.Where(x => x.Title == service.Service.Title).FirstOrDefault();
-                    if (delItem != null)
+                    if (result == MessageBoxResult.Yes)
                     {
-                        db.Service.Remove(delItem);
-                        db.SaveChanges();
+                        var delItem = db.Service.Where(x => x.Title == service.Service.Title).FirstOrDefault();
+                        if (delItem != null)
+                        {
+                            db.Service.Remove(delItem);
+                            db.SaveChanges();
+
+                            Dispatcher.Invoke(() => loadNiggers());
+                        }
                     }
                 }
-            }
+            });
         }
     }
 }

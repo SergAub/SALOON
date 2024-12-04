@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SALOON"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="460" Width="820" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -15,7 +15,7 @@
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="1.2*"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
@@ -42,7 +42,11 @@
                             <ColumnDefinition Width="30"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Image Source="{Binding Service.MainImagePath}" />
+                        <Image>
+                            <Image.Source>
+                                <BitmapImage UriSource="{Binding MainImg}"></BitmapImage>
+                            </Image.Source>
+                        </Image>
                         <StackPanel VerticalAlignment="Top" Grid.Column="2">
                             <TextBlock Text="{Binding Service.Title}" />
                             <StackPanel Orientation="Horizontal">
@@ -61,7 +65,7 @@
         </ListBox>
 
         <Button x:Name="btnBack" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="1" >Back</Button>
-        <TextBlock x:Name="tblDataCount" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="1"></TextBlock>
+        <TextBlock x:Name="tblDataCount" HorizontalAlignment="Center" Grid.Row="2" Grid.Column="1" VerticalAlignment="Center">[?]</TextBlock>
         <Button x:Name="btnNext" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="1">Next</Button>
         <ComboBox x:Name="cbPageSize" Width="60" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Left" SelectedIndex="0">
             <ComboBoxItem x:Name="cbiPagesAll">Все</ComboBoxItem>
@@ -78,5 +82,7 @@
             <ComboBoxItem x:Name="cbi3070">30-70 %</ComboBoxItem>
             <ComboBoxItem x:Name="cbi70100">70-100 %</ComboBoxItem>
         </ComboBox>
+
+        <Button x:Name="btnNew" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0">Добавить новую</Button>
     </Grid>
 </Window>

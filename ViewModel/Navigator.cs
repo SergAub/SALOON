@@ -30,8 +30,15 @@ namespace SALOON.ViewModel
                 }
             }
 
-            if (pages[pages.Count - 1].Count == 0)
-                pages.RemoveAt(pages.Count - 1);
+            if (pages.Count > 0)
+            {
+                if (pages[pages.Count - 1].Count == 0)
+                    pages.RemoveAt(pages.Count - 1);
+            }
+            else
+            {
+                pages.Add(new List<T>());
+            }
         }
 
         public List<T> CurrentPage { 

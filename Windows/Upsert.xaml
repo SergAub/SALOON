@@ -5,8 +5,72 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SALOON.Windows"
         mc:Ignorable="d"
-        Title="Upsert" Height="450" Width="800">
-    <Grid>
+        Title="Upsert" Height="470" Width="830" ResizeMode="NoResize">
+    <Grid Margin="10">
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="70"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="3">
+                <TextBlock FontSize="17" Width="160">Идентификатор</TextBlock>
+                <TextBox x:Name="tbId" FontSize="17" Width="220" IsReadOnly="True"></TextBox>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" Margin="3">
+                <TextBlock FontSize="17" Width="160">Название</TextBlock>
+                <TextBox x:Name="tbTitle" FontSize="17" Width="220"></TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="3">
+                <TextBlock FontSize="17" Width="160">Стоимость (руб)</TextBlock>
+                <TextBox x:Name="tbCost" FontSize="17" Width="220"></TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="3">
+                <TextBlock FontSize="17" Width="160">Длительность (сек)</TextBlock>
+                <TextBox x:Name="tbLastSeconds" FontSize="17" Width="220"></TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="3">
+                <TextBlock FontSize="17" Width="160">Описание</TextBlock>
+                <TextBox x:Name="tbDescr" FontSize="17" Width="220" MaxLines="4" MinLines="4" TextWrapping="Wrap"></TextBox>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" Margin="3">
+                <TextBlock FontSize="17" Width="160">Скидка (%)</TextBlock>
+                <TextBox x:Name="tbDiscount" FontSize="17" Width="220"></TextBox>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Grid.RowSpan="2">
+            <TextBlock>Основное фото</TextBlock>
+            <StackPanel Orientation="Horizontal">
+                <Image x:Name="imgMain" Height="130" Width="130" HorizontalAlignment="Left"></Image>
+                <Button x:Name="btnChooseMainPhoto" Margin="30,0,0,0" Width="200">Выбрать основное фото</Button>
+            </StackPanel>
+            <TextBlock>Прочие фото</TextBlock>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="btnAddPhoto">Добавить фото</Button>
+                <Button x:Name="btnRemovePhoto">Удалить фото</Button>
+            </StackPanel>
+            <ListBox Height="200" x:Name="lbPhoto">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Image Height="130" Width="130" Source="{Binding ServicePhoto.PhotoPath}"></Image>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
+
+        <Button x:Name="btnCancel" Grid.Row="1" HorizontalAlignment="Left">Отмена</Button>
+        <Button x:Name="btnSave" Grid.Row="1">Сохранить</Button>
         
     </Grid>
 </Window>
