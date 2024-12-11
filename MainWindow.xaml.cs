@@ -62,6 +62,7 @@ namespace SALOON
                 {
                     IsAdmin = true;
                     btnAdmin.IsEnabled = false;
+                    btnNew.Visibility = Visibility.Visible;
                     loadNiggers();
 
                     MessageBox.Show("Вы теперь админ :)");
@@ -211,7 +212,7 @@ namespace SALOON
         public void RecalculateCurrentDataSize()
         {
             int CurrentDataSize = Navigator.GetDataSize();
-            tblDataCount.Text = $"{CurrentDataSize * (Navigator.GetCurrentPage() + 1)}/{DataCount}";
+            tblDataCount.Text = $"{Math.Min(PageSize * (Navigator.GetCurrentPage() + 1), DataCount)}/{DataCount}";
         }
 
 

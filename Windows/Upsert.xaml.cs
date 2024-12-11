@@ -3,6 +3,7 @@ using SALOON.dbModel;
 using SALOON.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.IO;
 using System.Linq;
@@ -48,17 +49,7 @@ namespace SALOON.Windows
                 tbLastSeconds.Text = "" + service.Service.DurationInSeconds;
                 tbTitle.Text = "" + service.Service.Title;
 
-                using (var db = new Entities())
-                {
-                    var fucks = db.ServicePhoto.Where(x => x.ServiceID == serviceView.Service.ID).ToList();
-
-                    foreach(var fuck in fucks)
-                    {
-
-                    }
-
-                    lbPhoto.ItemsSource = fuck;
-                }
+                LoadPhotos();
 
                 try
                 {
@@ -77,6 +68,22 @@ namespace SALOON.Windows
             btnSave.Click += BtnSave_Click;
         }
 
+        private void LoadPhotos()
+        {
+            using (var db = new Entities())
+            {
+                var photos = db.ServicePhoto.Where(x => x.ServiceID == serviceView.Service.ID).ToList();
+                var zatknis = new List<ServicePhotoView>();
+
+                foreach (var photo in photos)
+                {
+                    zatknis.Add(new ServicePhotoView { ServicePhoto = photo });
+                }
+
+                lbPhoto.ItemsSource = zatknis;
+            }
+        }
+
         private Service getServiceFromFields()
         {
             var s = serviceView.Service;
@@ -87,15 +94,18 @@ namespace SALOON.Windows
             if (tbTitle.Text.Length <= 2) throw new Exception("No title defined"); 
             s.Title = tbTitle.Text.Trim();
 
-            if(!decimal.TryParse(tbCost.Text.Replace(" ", ""), out cost)) throw new Exception("Недопустимые данные");
-            if (!double.TryParse(tbDiscount.Text.Replace(" ", ""), out disc)) throw new Exception("Недопустимые данные");
-            if (!int.TryParse(tbDiscount.Text.Replace(" ", ""), out dur)) throw new Exception("Недопустимые данные");
+            if(!decimal.TryParse(tbCost.Text.Replace(" ", ""), out cost)) throw new Exception("Неверно указана цена");
+            if (!double.TryParse(tbDiscount.Text.Replace(" ", ""), out disc)) throw new Exception("Неверно указана скидка");
+            if (!int.TryParse(tbLastSeconds.Text.Replace(" ", ""), out dur)) throw new Exception("Недопустимое время");
 
             s.Description = tbDescr.Text.Trim();
 
-            if (dur > 240 || dur < 1) throw new Exception("0000x800000000000");
+            if (dur <= 60 || dur > 60 * 60 * 4) throw new Exception("Неверно указано время");
+            if (disc < 0) throw new Exception("Неверно указана скидка");
+            if (cost <= 0) throw new Exception("Неверно указана цена");
+
             s.Cost = cost;
-            s.Discount = disc;
+            s.Discount = disc / 100.0;
             s.DurationInSeconds = dur;
 
             return s;
@@ -120,8 +130,36 @@ namespace SALOON.Windows
 
         private void BtnRemovePhoto_Click(object sender, RoutedEventArgs e)
         {
-            if (lbPhoto.SelectedIndex != -1)
-                lbPhoto.Items.RemoveAt(lbPhoto.SelectedIndex); 
+            if (lbPhoto.SelectedItem == null) return;
+            var x = MessageBox.Show("Delete this photo? Cannot be canseled ater Yes", "Tugrik", MessageBoxButton.YesNo);          
+            if (x != MessageBoxResult.Yes) return;
+
+            try
+            {
+                var photo = (lbPhoto.SelectedItem as ServicePhotoView).ServicePhoto;
+
+                if (createNew)
+                {
+                    serviceView.Service.ServicePhoto.Remove(photo);
+                    lbPhoto.Items.RemoveAt(lbPhoto.SelectedIndex);
+                }
+                else
+                {
+                    using (var db = new Entities())
+                    {
+                        db.ServicePhoto.Attach(photo); 
+                        db.ServicePhoto.Remove(photo);
+                        db.SaveChanges();
+
+                        serviceView.Service = db.Service.Where(xy => xy.ID == serviceView.Service.ID).First();
+                    }
+                    LoadPhotos();
+                }                              
+            }
+            catch (Exception fs)
+            {
+                MessageBox.Show(fs.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void BtnChooseMainPhoto_Click(object sender, RoutedEventArgs e)
@@ -139,7 +177,11 @@ namespace SALOON.Windows
                         Directory.CreateDirectory("Images");
 
                     serviceView.Service.MainImagePath = "Images/" + newfilename;
-                    File.Copy(openFileDialog.FileName, "Images/" + newfilename);
+
+                    if (!File.Exists("Images/" + newfilename))
+                    {
+                        File.Copy(openFileDialog.FileName, "Images/" + newfilename);
+                    }
                 }
                 catch (Exception e3) {
                     MessageBox.Show(e3.Message);
@@ -151,7 +193,59 @@ namespace SALOON.Windows
 
         private void BtnAddPhoto_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "PNG|*.png|JPG|*.jpg|JPEG|*.jpeg";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string newfilename = openFileDialog.FileName.Replace("/", "").Replace("\\", "").Replace(":", "");
+
+                try
+                {
+                    if (!Directory.Exists("Images"))
+                        Directory.CreateDirectory("Images");
+
+                    if (!File.Exists("Images/" + newfilename)) {
+                        File.Copy(openFileDialog.FileName, "Images/" + newfilename);
+                    }
+
+                    var h = new ServicePhoto
+                    {
+                        PhotoPath = "Images/" + newfilename
+                    };
+
+                    if (createNew)
+                    {
+                        if (serviceView.Service.ServicePhoto == null || serviceView.Service.ServicePhoto.Count == 0)
+                        {
+                            serviceView.Service.ServicePhoto = new List<ServicePhoto> { h };
+                        }
+                        else
+                        {
+                            serviceView.Service.ServicePhoto.Add(h);
+                        }
+
+                        lbPhoto.Items.Add(new ServicePhotoView { ServicePhoto = h });
+                    }
+                    else
+                    {
+                        using (var db = new Entities())
+                        {
+                            h.ServiceID = serviceView.Service.ID;
+                            db.ServicePhoto.AddOrUpdate(h);
+
+                            db.SaveChanges();                           
+                        }
+                        LoadPhotos();
+                    }
+
+                    
+                }
+                catch (Exception e3)
+                {
+                    MessageBox.Show(e3.Message);
+                }
+            }
         }
     }
 }

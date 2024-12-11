@@ -83,6 +83,6 @@
             <ComboBoxItem x:Name="cbi70100">70-100 %</ComboBoxItem>
         </ComboBox>
 
-        <Button x:Name="btnNew" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0">Добавить новую</Button>
+        <Button x:Name="btnNew" Visibility="Hidden" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0">Добавить новую</Button>
     </Grid>
 </Window>

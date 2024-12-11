@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SALOON.Windows"
         mc:Ignorable="d"
-        Title="Upsert" Height="470" Width="830" ResizeMode="NoResize">
+        Title="Upsert" Height="622" Width="830" ResizeMode="NoResize">
     <Grid Margin="10">
 
         <Grid.ColumnDefinitions>
@@ -60,13 +60,22 @@
                 <Button x:Name="btnAddPhoto">Добавить фото</Button>
                 <Button x:Name="btnRemovePhoto">Удалить фото</Button>
             </StackPanel>
-            <ListBox Height="200" x:Name="lbPhoto">
+            <ListView Height="350" x:Name="lbPhoto" >
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="2"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Image Height="130" Width="130" Source="{Binding ServicePhoto.PhotoPath}"></Image>
+                        <Image Height="130" Width="130">
+                            <Image.Source>
+                                <BitmapImage UriSource="{Binding PhotoPath}"/>
+                            </Image.Source>
+                        </Image>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
-            </ListBox>
+            </ListView>
         </StackPanel>
 
         <Button x:Name="btnCancel" Grid.Row="1" HorizontalAlignment="Left">Отмена</Button>
